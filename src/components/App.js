@@ -2,7 +2,7 @@ import '../styles/App.css';
 import React from 'react';
 import { useQuery, gql } from '@apollo/client';
 
-const USER_LIST = gql`
+const COUNTRY_LIST = gql`
 query {
   countries {
     name
@@ -13,11 +13,21 @@ query {
 }`;
 
 function App() {
-  const { loading, error, data } = useQuery(USER_LIST);
+  const { loading, error, data } = useQuery(COUNTRY_LIST);
 
   if (loading) return (<> Loading</>);
   if (error) return (<>{JSON.stringify(error)}</>);
-  return (<>{JSON.stringify(data)}</>);
+
+  return (<>
+    {data.countries.map((country) => {
+      return <ul key={country.name}>
+        <li>{country.name}</li>
+        <ul>{country.languages.map((language) => {
+          return <li key={language.name}>{language.name}</li>;
+        })}</ul>
+      </ul>;
+    })}
+  </>);
 }
 
 export default App;
