@@ -1,5 +1,5 @@
 import '../styles/App.css';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery, gql } from '@apollo/client';
 import { VectorMap } from "react-jvectormap";
 import { Autocomplete, TextField, Typography } from '@mui/material';
@@ -23,25 +23,31 @@ function App() {
   const { loading, error, data } = useQuery(COUNTRY_LIST);
   const [language, setLanguage] = useState(null);
   const [countries, setCountries] = useState([]);
+  const [codes, setCodes] = useState([]);
+  const [mapData, setMapData] = useState({});
 
-  const mapData = {
-    CN: 1,
-    IN: 1,
-    SA: 1,
-    EG: 1,
-    SE: 1,
-    FI: 1,
-    FR: 1,
-    US: 1
-  };
+  useEffect(() => {
+    if (data) {
+      let arr = data.countries.map((country) => country.code);
+      setCodes(arr);
+
+      let obj = {};
+      data.countries.map((country) => country.code).forEach((code) => {
+        obj[code] = 0;
+      });
+
+      setMapData(obj);
+    }
+
+  }, [mapData]);
 
   const onLanguageSelect = (e) => {
     setLanguage(e.target.textContent);
 
     let selection = [];
 
-    data.countries.map((country) => {
-      country.languages.map((lang) => {
+    data.countries.forEach((country) => {
+      country.languages.forEach((lang) => {
         if (lang.name === e.target.textContent) {
           selection.push(country);
         }
@@ -50,6 +56,10 @@ function App() {
     });
 
     setCountries(selection);
+
+    selection.forEach((country) => {
+      mapData[country.code] = 1;
+    });
   };
 
   if (loading) return (<> Loading</>);
@@ -64,13 +74,7 @@ function App() {
 
     <Typography variant="h3">{language}</Typography>
 
-    <ul>
-      {countries.map((country) => {
-        return <li key={country.code}>{country.name}</li>;
-      })}
-    </ul>
-
-    {/* <VectorMap
+    <VectorMap
       map={"world_mill"}
       backgroundColor="#0077be"
       zoomOnScroll={false}
@@ -101,7 +105,7 @@ function App() {
           }
         ]
       }}
-    /> */}
+    />
   </>);
 }
 
