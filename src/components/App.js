@@ -30,19 +30,17 @@ function App() {
     if (data) {
       let arr = data.countries.map((country) => country.code);
       setCodes(arr);
-
-      let obj = {};
-      data.countries.map((country) => country.code).forEach((code) => {
-        obj[code] = 0;
-      });
-
-      setMapData(obj);
     }
 
-  }, [mapData]);
+  }, [mapData, data]);
 
   const onLanguageSelect = (e) => {
     setLanguage(e.target.textContent);
+
+    if (e.target.textContent === "") {
+      setMapData({});
+      return;
+    }
 
     let selection = [];
 
